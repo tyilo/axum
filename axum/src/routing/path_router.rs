@@ -1,8 +1,12 @@
-use crate::body::{Body, HttpBody};
+use crate::{
+    body::{Body, HttpBody},
+    extract::nested_path::SetNestedPathLayer,
+};
 use axum_core::response::IntoResponse;
 use http::Request;
 use matchit::MatchError;
 use std::{borrow::Cow, collections::HashMap, convert::Infallible, fmt, sync::Arc};
+use tower::ServiceBuilder;
 use tower_layer::Layer;
 use tower_service::Service;
 
@@ -149,7 +153,12 @@ where
 
             let path = path_for_nested_route(prefix, inner_path);
 
-            match endpoint.layer(StripPrefix::layer(prefix)) {
+            let layer = ServiceBuilder::new()
+                .layer(StripPrefix::layer(prefix))
+                .layer(SetNestedPathLayer::new(prefix))
+                .into_inner();
+
+            match endpoint.layer(layer) {
                 Endpoint::MethodRouter(method_router) => {
                     self.route(&path, method_router)?;
                 }
@@ -177,7 +186,12 @@ where
             format!("{path}/*{NEST_TAIL_PARAM}")
         };
 
-        let endpoint = Endpoint::Route(Route::new(StripPrefix::new(svc, prefix)));
+        let layer = ServiceBuilder::new()
+            .layer(StripPrefix::layer(prefix))
+            .layer(SetNestedPathLayer::new(prefix))
+            .into_inner();
+
+        let endpoint = Endpoint::Route(Route::new(layer.layer(svc)));
 
         self.route_endpoint(&path, endpoint.clone())?;
 

@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Unreleased
 
-- **added:** Add `NestedPath` extractor
+- **added:** Add `NestedPath` extractor ([#1924])
+
+[#1924]: https://github.com/tokio-rs/axum/pull/1924
 
 # 0.6.13 (11. April, 2023)
 

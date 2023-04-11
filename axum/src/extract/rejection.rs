@@ -213,7 +213,7 @@ pub use crate::typed_header::{TypedHeaderRejection, TypedHeaderRejectionReason};
 
 define_rejection! {
     #[status = INTERNAL_SERVER_ERROR]
-    #[body = "Failed to deserialize the JSON body into the target type"]
+    #[body = "The matched route is not nested"]
     /// Rejection type for [`NestedPath`](super::NestedPath).
     ///
     /// This rejection is used if the matched route wasn't nested.

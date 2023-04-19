@@ -6,7 +6,7 @@ use std::{
 use async_trait::async_trait;
 use axum_core::extract::FromRequestParts;
 use http::{request::Parts, Request};
-use tower_layer::Layer;
+use tower_layer::{Layer, layer_fn};
 use tower_service::Service;
 
 use super::rejection::NestedPathRejection;
@@ -62,31 +62,19 @@ where
 }
 
 #[derive(Clone)]
-pub(crate) struct SetNestedPathLayer {
-    path: Arc<str>,
-}
-
-impl SetNestedPathLayer {
-    pub(crate) fn new(path: &str) -> Self {
-        Self { path: path.into() }
-    }
-}
-
-impl<S> Layer<S> for SetNestedPathLayer {
-    type Service = SetNestedPath<S>;
-
-    fn layer(&self, inner: S) -> Self::Service {
-        SetNestedPath {
-            inner,
-            path: Arc::clone(&self.path),
-        }
-    }
-}
-
-#[derive(Clone)]
 pub(crate) struct SetNestedPath<S> {
     inner: S,
     path: Arc<str>,
+}
+
+impl<S> SetNestedPath<S> {
+    pub(crate) fn layer(path: &str) -> impl Layer<S, Service = Self> + Clone {
+        let path = Arc::from(path);
+        layer_fn(move |inner| Self {
+            inner,
+            path: Arc::clone(&path),
+        })
+    }
 }
 
 impl<S, B> Service<Request<B>> for SetNestedPath<S>
@@ -97,6 +85,7 @@ where
     type Error = S::Error;
     type Future = S::Future;
 
+    #[inline]
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         self.inner.poll_ready(cx)
     }

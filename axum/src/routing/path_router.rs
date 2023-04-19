@@ -1,6 +1,6 @@
 use crate::{
     body::{Body, HttpBody},
-    extract::nested_path::SetNestedPathLayer,
+    extract::nested_path::SetNestedPath,
 };
 use axum_core::response::IntoResponse;
 use http::Request;
@@ -155,7 +155,7 @@ where
 
             let layer = ServiceBuilder::new()
                 .layer(StripPrefix::layer(prefix))
-                .layer(SetNestedPathLayer::new(prefix))
+                .layer(SetNestedPath::layer(prefix))
                 .into_inner();
 
             match endpoint.layer(layer) {
@@ -188,7 +188,7 @@ where
 
         let layer = ServiceBuilder::new()
             .layer(StripPrefix::layer(prefix))
-            .layer(SetNestedPathLayer::new(prefix))
+            .layer(SetNestedPath::layer(prefix))
             .into_inner();
 
         let endpoint = Endpoint::Route(Route::new(layer.layer(svc)));

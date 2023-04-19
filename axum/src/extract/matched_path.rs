@@ -172,7 +172,11 @@ fn append_nested_matched_path(matched_path: &Arc<str>, extensions: &http::Extens
 mod tests {
     use super::*;
     use crate::{
-        handler::HandlerWithoutStateExt, middleware::map_request, routing::get, test_helpers::*,
+        body::Body,
+        handler::HandlerWithoutStateExt,
+        middleware::map_request,
+        routing::{any, get},
+        test_helpers::*,
         Router,
     };
     use http::{Request, StatusCode};
@@ -347,6 +351,41 @@ mod tests {
         }
 
         let app = Router::new().nest_service("/:a", handler.into_service());
+
+        let client = TestClient::new(app);
+
+        let res = client.get("/foo/bar").send().await;
+        assert_eq!(res.status(), StatusCode::OK);
+    }
+
+    // https://github.com/tokio-rs/axum/issues/1579
+    #[crate::test]
+    async fn doesnt_panic_if_router_called_from_wildcard_route() {
+        use tower::ServiceExt;
+
+        let app = Router::new().route(
+            "/*path",
+            any(|req: Request<Body>| {
+                Router::new()
+                    .nest("/", Router::new().route("/foo", get(|| async {})))
+                    .oneshot(req)
+            }),
+        );
+
+        let client = TestClient::new(app);
+
+        let res = client.get("/foo").send().await;
+        assert_eq!(res.status(), StatusCode::OK);
+    }
+
+    #[crate::test]
+    async fn cant_extract_in_fallback() {
+        async fn handler(path: Option<MatchedPath>, req: Request<Body>) {
+            assert!(path.is_none());
+            assert!(req.extensions().get::<MatchedPath>().is_none());
+        }
+
+        let app = Router::new().fallback(handler);
 
         let client = TestClient::new(app);
 

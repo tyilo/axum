@@ -11,6 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [#1924]: https://github.com/tokio-rs/axum/pull/1924
 
+# 0.6.16 (18. April, 2023)
+
+- **fixed:** Don't allow extracting `MatchedPath` in fallbacks ([#1934])
+- **fixed:** Fix panic if `Router` with something nested at `/` was used as a fallback ([#1934])
+- **added:** Document that `Router::new().fallback(...)` isn't optimal ([#1940])
+
+[#1934]: https://github.com/tokio-rs/axum/pull/1934
+[#1940]: https://github.com/tokio-rs/axum/pull/1940
+
+# 0.6.15 (12. April, 2023)
+
+- **fixed:** Removed additional leftover debug messages ([#1927])
+
+[#1927]: https://github.com/tokio-rs/axum/pull/1927
+
+# 0.6.14 (11. April, 2023)
+
+- **fixed:** Removed leftover "path_router hit" debug message ([#1925])
+
+[#1925]: https://github.com/tokio-rs/axum/pull/1925
+
 # 0.6.13 (11. April, 2023)
 
 - **added:** Log rejections from built-in extractors with the

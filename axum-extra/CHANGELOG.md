@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning].
 
 - None.
 
+# 0.7.4 (18. April, 2023)
+
+- **added:** Add `Html` response type ([#1921])
+- **added:** Add `Css` response type ([#1921])
+- **added:** Add `JavaScript` response type ([#1921])
+- **added:** Add `Wasm` response type ([#1921])
+
+[#1921]: https://github.com/tokio-rs/axum/pull/1921
+
 # 0.7.3 (11. April, 2023)
 
 - **added:** Implement `Deref` and `DerefMut` for built-in extractors ([#1922])

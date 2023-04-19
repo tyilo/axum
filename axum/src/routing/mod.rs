@@ -57,8 +57,8 @@ pub(crate) struct RouteId(u32);
 /// The router type for composing handlers and services.
 #[must_use]
 pub struct Router<S = (), B = Body> {
-    path_router: PathRouter<S, B>,
-    fallback_router: PathRouter<S, B>,
+    path_router: PathRouter<S, B, false>,
+    fallback_router: PathRouter<S, B, true>,
     default_fallback: bool,
 }
 
@@ -299,10 +299,7 @@ where
         }
 
         match self.path_router.call_with_state(req, state) {
-            Ok(future) => {
-                println!("path_router hit");
-                future
-            }
+            Ok(future) => future,
             Err((mut req, state)) => {
                 let super_fallback = req
                     .extensions_mut()
@@ -502,7 +499,7 @@ impl<S, B> fmt::Debug for Endpoint<S, B> {
     }
 }
 
-struct SuperFallback<S, B>(SyncWrapper<PathRouter<S, B>>);
+struct SuperFallback<S, B>(SyncWrapper<PathRouter<S, B, true>>);
 
 #[test]
 #[allow(warnings)]

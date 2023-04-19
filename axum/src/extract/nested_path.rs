@@ -6,7 +6,7 @@ use std::{
 use async_trait::async_trait;
 use axum_core::extract::FromRequestParts;
 use http::{request::Parts, Request};
-use tower_layer::{Layer, layer_fn};
+use tower_layer::{layer_fn, Layer};
 use tower_service::Service;
 
 use super::rejection::NestedPathRejection;

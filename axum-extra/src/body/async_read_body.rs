@@ -3,6 +3,7 @@ use axum::{
     response::{IntoResponse, Response},
     Error,
 };
+use http::{header::CONTENT_LENGTH, HeaderMap};
 use pin_project_lite::pin_project;
 use std::{
     pin::Pin,
@@ -49,6 +50,7 @@ pin_project! {
     pub struct AsyncReadBody {
         #[pin]
         body: Body,
+        size: Option<u64>,
     }
 }
 
@@ -60,6 +62,19 @@ impl AsyncReadBody {
     {
         Self {
             body: Body::from_stream(ReaderStream::new(read)),
+            size: None,
+        }
+    }
+
+    /// Create a new `AsyncReadBody` with a known size.
+    /// The size will be added as the `Content-Length` header.
+    pub fn new_with_size<R>(read: R, size: u64) -> Self
+    where
+        R: AsyncRead + Send + 'static,
+    {
+        Self {
+            body: Body::from_stream(ReaderStream::new(read)),
+            size: Some(size),
         }
     }
 }
@@ -89,6 +104,11 @@ impl HttpBody for AsyncReadBody {
 
 impl IntoResponse for AsyncReadBody {
     fn into_response(self) -> Response {
-        self.body.into_response()
+        let headers = self.size.map(|size| {
+            let mut headers = HeaderMap::new();
+            headers.append(CONTENT_LENGTH, size.into());
+            headers
+        });
+        (headers, self.body).into_response()
     }
 }

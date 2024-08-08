@@ -3,7 +3,7 @@ use axum::{
     response::{IntoResponse, Response},
     Error,
 };
-use http::{header::CONTENT_LENGTH, HeaderMap};
+use http::{header::CONTENT_LENGTH, HeaderMap, HeaderValue};
 use pin_project_lite::pin_project;
 use std::{
     pin::Pin,
@@ -104,11 +104,9 @@ impl HttpBody for AsyncReadBody {
 
 impl IntoResponse for AsyncReadBody {
     fn into_response(self) -> Response {
-        let headers = self.size.map(|size| {
-            let mut headers = HeaderMap::new();
-            headers.append(CONTENT_LENGTH, size.into());
-            headers
-        });
+        let headers = self
+            .size
+            .map(|size| [(CONTENT_LENGTH, HeaderValue::from(size))]);
         (headers, self.body).into_response()
     }
 }
